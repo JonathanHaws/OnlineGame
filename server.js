@@ -46,7 +46,7 @@ function tick(){
 } 
 setInterval(tick,1000/60); //tickrate
 io.on('connection',(socket)=>{ //handle player joining server                
-  if (Object.keys(game.players).length >= 4){ socket.disconnect(); return;} //server full
+  if (Object.keys(game.players).length > 5){ socket.disconnect(); return;} //server full
   console.log(`New Player ${socket.id}`);
   game.players[socket.id] = new Player(0,0,socket.handshake.query.name); //console.log(game);
   socket.on('input',(input)=>{ game.players[socket.id].input = input})
