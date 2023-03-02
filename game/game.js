@@ -1,24 +1,33 @@
 let players = {};
 let player;
 function setup(){
-  createCanvas(1280,720); //canvas.parent('#game');
-  player = new Player(width/2, height/2);
+  createCanvas(1280,720);
+  let name = prompt("Please enter your name:");
+  console.log(name);
+  player = new Player(width/2, height/2, name);
   socket = io.connect();// connect to the server
-  setInterval(() => { socket.emit('update',{x:player.x, y:player.y})},1000/60); 
+  setInterval(() => { socket.emit('update',{x:player.x, y:player.y, name:player.name})},1000/60); 
   socket.on('update', function(data) {players = data;});
 }
   
-function draw(){
+function draw(){ //console.log(players); //list of all players on server
   background(220);
   fill(100);
   rect(0, height/2, width, height/2);
-  //console.log(players);
-  for (let player in players){ fill(255, 0, 0); circle(players[player].x, players[player].y, 20);}
+
+  for (let p in players){ 
+    let player = players[p];
+    fill('#3b3b3b80');
+    textSize(20); textAlign(CENTER);
+    text(player.name, player.x, player.y-20);
+    fill(255, 0, 0); circle(player.x, player.y, 20);
+  }
   player.update();
 }
   
 class Player{
-  constructor(x, y) {
+  constructor(x, y, name) {
+    this.name = name;
     this.x = x; this.y = y;
     this.velX = 0; this.velY = 0;
     this.falling = 0;
@@ -35,6 +44,8 @@ class Player{
       this.falling = 0; 
       this.y = (height/2 - this.size/2) 
     }
+    if(this.x<0){this.x+= width}
+    if(this.x>width){this.x-= width}
   }
   reset(){
     this.x = this.spawnx; this.y = this.spawny;

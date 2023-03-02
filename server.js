@@ -17,10 +17,11 @@ io.on('connection',(socket)=>{
     return;
   } else { console.log(`New player connected: ${socket.id}`);}
 
-  players[socket.id] = {x:0, y:0};
+  players[socket.id] = {x:0, y:0, name:""};
   socket.on('update',(data)=>{
     players[socket.id].x = data.x;
     players[socket.id].y = data.y;
+    players[socket.id].name = data.name;
     io.emit('update', players);
   });
   socket.on('disconnect',()=>{ console.log(`Player disconnected: ${socket.id}`);
