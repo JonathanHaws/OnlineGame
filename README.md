@@ -7,9 +7,11 @@ https://onlinegame.herokuapp.com/ A test on how I could use websockets to make a
 ## To Do List
 - character wrapping (walks off side of screen appears on other side)
 - comeup with asthetic game name and idea (context) / Story
+- add player health and character respawning
+- add scoreboard 
 - add basic attack
-- add graphics 
-- add sounds 
+- add unique graphics with spritesheet related to game idea
+- add sound effects
 - add stuff that falls from the sky (health packs, special weapons, powerups)?
 
 ### Credits
