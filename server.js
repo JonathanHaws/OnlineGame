@@ -8,7 +8,11 @@ const port = process.env.PORT || 3001;
 
 app.use(express.static('game'));
 
-const players = {};
+// var game = {players:{},objects:{}} // holds all the data that needs to be sync between clients
+// function tick(){ io.emit('update', game);} //send every client the game data
+// setInterval(tick,1000/30); //tickrate is 30
+
+var players = {};
 io.on('connection',(socket)=>{                      
   if (Object.keys(players).length >= 4) { 
     console.log('Server Full');
@@ -17,11 +21,13 @@ io.on('connection',(socket)=>{
     return;
   } else { console.log(`New player connected: ${socket.id}`);}
 
-  players[socket.id] = {x:0, y:0, name:""};
+  players[socket.id] = {x:0, y:0, name:"", health:100, sprite:"idle" };
   socket.on('update',(data)=>{
     players[socket.id].x = data.x;
     players[socket.id].y = data.y;
     players[socket.id].name = data.name;
+    players[socket.id].health = data.health;
+    players[socket.id].sprite = data.sprite;
     io.emit('update', players);
   });
   socket.on('disconnect',()=>{ console.log(`Player disconnected: ${socket.id}`);
@@ -29,5 +35,6 @@ io.on('connection',(socket)=>{
     io.emit('update', players);
   });
 })
+
    
 server.listen(port,()=>{ console.log(`Server is running on port ${port}.`)});
