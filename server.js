@@ -10,7 +10,7 @@ class Player{
   constructor(x,y,name){
     this.input = {x:0,y:0};
     this.name = name;
-    this.sprite = 'idle';
+    this.image = 'idle'
     this.health = 100;
     this.x = x; this.y = y;
     this.xv = 0; this.yv = 0;
@@ -31,56 +31,57 @@ class Player{
     if(this.x<0){this.x+=1280}; if(this.x>1280){this.x-=1280}; //wrap 
     if(this.input.y ==-1){ this.attack()}  
     this.cooldown-=1;    
-    frame.draw(this.x,this.y,this.sprite)
+    game.circle(this.x,this.y,20,20,'#383838');
+    game.text(this.x,this.y-20,this.name,'#383838',20);
   }
   async attack(){
     if (this.cooldown > 0) {return}
-    this.sprite='attack'
+    this.image='attack'
     await new Promise(resolve => setTimeout(resolve, 200));
-    this.sprite='idle'
+    this.image='idle'
     this.cooldown = 60;
-    game.objects.push(new Projectile(this.x,this.y))
+    objects.push(new Projectile(this.x,this.y))
   }
   death(){ this.velX = 0; this.velY = 0;}
 }
 
 class Projectile{
   constructor(x,y){
-    this.sprite = 'idle' 
+    this.image = 'idle' 
     this.x = x; this.y = y;
     this.xv = 0; this.yv = 0;
   }
-  update(){}
+  update(){
+    game.draw(this.x,this.y,this.image);
+  }
 }
 
-class clientData{
-  constructor(){ this.sprites=[]; this.sounds=[]; this.text=[]}
-  reset(){ this.sprites=[]; this.sounds=[]; this.text=[]}
-  draw(x,y,sprite){ this.sprites.push({x:x, y:y, sprite:sprite})}
-  sound(x,y,sound){ this.sounds.push({x:x, y:y, sound:sound})}
-  text(x,y,text){ this.text.push({x:x, y:y, text:text})}
+var game = { 
+  players:{},
+  objects:[],
+  clientData:{ empty(){this.sprites=[],this.sounds=[],this.text=[],this.circles=[]}},
+  draw(x,y,sprite){ this.clientData.sprites.push({x:x,y:y,sprite:sprite})},
+  circle(x,y,width,height,color){ this.clientData.circles.push({x:x,y:y,width:width,height:height,color:color})},
+  sound(x,y,sound){ this.clientData.sounds.push({x:x,y:y,sound:sound})},
+  text(x,y,text,color,size){ this.clientData.text.push({x:x,y:y,text:text,color:color,size:size})}
 }
+
+function tick(){ 
+  game.clientData.empty();
+  Object.values(game.players).forEach(player => player.update());
+  game.objects.forEach(object => object.update());
+  io.emit('update', game.clientData);
+} 
+setInterval(tick,1000/60); 
+
+io.on('connection',(socket)=>{             
+  if (Object.keys(game.players).length > 8){ socket.disconnect(); return;}
+  game.players[socket.id] = new Player(0,0,socket.handshake.query.name); 
+  socket.on('input',(input)=>{ game.players[socket.id].input = input}) 
+  socket.on('disconnect',()=>{ delete game.players[socket.id];});
+})
 
 app.use(express.static('game'));
-
-var frame = new clientData();
-var objects = new Array(8).fill('available slot'); //first slots are players and length is max players 
-setInterval(tick,1000/60); 
-function tick(){ 
-  frame.reset();
-  objects.forEach(object => { if (object.update !== undefined){ object.update()}});
-  //console.log(frame);
-  io.emit('update', frame);//send out frame data to clients
-} 
-
-io.on('connection',(socket)=>{ //handle player joining server                
-  if (!objects.includes('available slot')){ socket.disconnect(); return;} //server full
-  console.log(`Player ${socket.id} Joined`);
-  const slot = objects.indexOf('available slot');
-  objects[slot] = new Player(0,0,socket.handshake.query.name); //console.log(game);
-  socket.on('input',(input)=>{ objects[slot].input = input})
-  socket.on('disconnect',()=>{ console.log(`Player ${socket.id} Left`); objects[slot]='available slot';});
-})
-server.listen(port,()=>{ console.log(`Server listening ${port}.`)});
+server.listen(port,()=>{ console.log(`Server live ${port}.`)});
 
 

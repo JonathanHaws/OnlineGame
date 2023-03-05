@@ -14,28 +14,9 @@ function draw(){// console.log(serverinfo);
   fill(100);
   rect(0, height/2, width, height/2);
   if(serverinfo){
-    serverinfo.sprites.forEach(sprite =>{
-      circle(sprite.x, sprite.y, 20);
- 
-    })
+    serverinfo.circles.forEach(circle =>{ fill(circle.color); ellipse(circle.x, circle.y, circle.width, circle.height)})
+    serverinfo.text.forEach(t =>{ fill(t.color); textSize(t.size); textAlign(CENTER); text(t.text, t.x, t.y)})
    
   }
-
-  
-  // arr.forEach(obj => {
-  //   console.log(obj.name + ' is ' + obj.age + ' years old');
-  // });
-  // for (let i in game.objects){let object=game.objects[i];
-  //   fill('#3b3b3b80');
-  //   textSize(20); textAlign(CENTER);
-  //   text(object.name, object.x, object.y-20);
-  //   fill(255, 0, 0);
-  //   if (object.sprite == 'attack'){
-  //     ellipse(object.x, object.y+5, 40, 10);
-  //   } else {
-  //     circle(object.x, object.y, 20);
-  //   }
-  //   rect(object.x - 25, object.y - 45, (object.health/100)*50, 5);
-  // }
 }
   
