@@ -25,9 +25,9 @@ class Game {
       });
     }
     this.tick = function(){
-      this.clientData = { sprites: [], sounds:[], text:[], circles:[] };
-      this.objects.forEach(object => object.tick(this));
-      Object.values(this.players).forEach(player => {player.tick(this);});
+      this.clientData = { sprites: [], sounds:[], text:[], circles:[], rectangles:[] };
+      this.objects.forEach(object => object.tick());  
+      Object.values(this.players).forEach(player => {player.tick();});
       Object.keys(this.players).forEach(player => {io.to(player).emit('tick', this.clientData);});
     }
     this.interval = setInterval(()=> this.tick(), 1000/tickrate); 
@@ -39,8 +39,6 @@ class Game {
     function despawn(object){
       game.objects.splice(game.objects.indexOf(object), 1);
     }
-
-    
     function draw(x, y, sprite){
       game.clientData.sprites.push({
         x: x,
@@ -71,6 +69,15 @@ class Game {
         text: text,
         color: color,
         size: size
+      });
+    }
+    function rectangle(x, y, width, height, color){
+      game.clientData.rectangles.push({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        color: color,
       });
     }
     function object(object, type, x, y, xv, yv, width, height, image){
@@ -116,16 +123,13 @@ class Game {
         object(this,'Player', 40, 40, x, y, 20, 20, 'idle'); 
         this.input = {x:0, y:0, mouseX:0, mousey:0, mouseIsPressed:0};
         this.name = name;
-        this.health = 100;
-        this.speed = 3;
-        this.falling = 0;
-        this.cooldown =0;
+        this.death(0);
       }
       tick(){
+        if (this.health <= 0) { this.death(200); return } //death
         move(this, 1, .7); 
         this.xv += this.input.x * this.speed; // Side Movement
         if (this.input.y == 1 && this.falling < 6) { this.yv = -12 } // Jumping
-  
         if(this.y > 360){  // collision bottom of screen
           this.falling = 0; 
           this.y = 360;                           
@@ -133,8 +137,10 @@ class Game {
         wrap(this);
         if(this.input.mouseIsPressed){ this.attack()}  
         this.cooldown-=1;    
-        circle(this.x,this.y,20,20,'#383838');
-        text(this.x,this.y-20,this.name,'#383838',20);
+        circle(this.x, this.y, 20, 20,'#383838');
+        text(this.x, this.y-20, this.name,'#383838',20);
+        rectangle(this.x -25, this.y-40, (this.health/100)*50, 5, '#383838');
+        if(this.input.y == -1){ this.health --;}  
       }
       async attack(){
         if (this.cooldown > 0) {return}
@@ -145,7 +151,16 @@ class Game {
         var direction = pointTowardsFrom(this.x, this.y, this.input.mouseX, this.input.mouseY);
         game.objects.push(new Projectile(this.x, this.y, direction.x, direction.y,20));
       }
-      death(){ this.velX = 0; this.velY = 0;}
+      async death(cooldown){ 
+        this.x = (Math.floor(Math.random() * 5000));
+        this.y = -40;
+        this.xv = 0;
+        this.yv = 0;
+        this.health = 100;
+        this.falling = 0;
+        this.speed = 3;
+        this.cooldown =0;
+      }
     }
     class Projectile{
       constructor(x,y,xv,yv,power){
