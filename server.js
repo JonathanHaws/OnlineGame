@@ -8,113 +8,155 @@ const port    = process.env.PORT || 3001;
 
 class Game {
   constructor(maxPlayers, tickrate){
+    this.join = function(player){
+      if (Object.keys(this.players).length >= this.maxPlayers){
+        console.log('Game Is Full');
+        player.disconnect();
+        return;
+      }
+      console.log(`Player ${player.id} Joined`);
+      this.players[player.id] = new Player(this, 0, 0, player.handshake.query.name || 'player');
+      player.on('input',(input)=>{ 
+        this.players[player.id].input = input
+      })    
+      player.on('disconnect',()=>{ 
+        console.log(`Player ${player.id} Left`);
+        delete this.players[player.id];
+      });
+    }
+    this.tick = function(){
+      this.clientData = { sprites: [], sounds:[], text:[], circles:[] };
+      this.objects.forEach(object => object.tick(this));
+      Object.values(this.players).forEach(player => {player.tick(this);});
+      Object.keys(this.players).forEach(player => {io.to(player).emit('tick', this.clientData);});
+    }
     this.interval = setInterval(()=> this.tick(), 1000/tickrate); 
     this.maxPlayers = maxPlayers;
     this.players = {};
     this.objects = [];
-  }
-  join(player){
-    if (Object.keys(this.players).length >= this.maxPlayers){
-      console.log('Game Is Full');
-      player.disconnect();
-      return;
+    this.game = this;
+    
+    function despawn(object){
+      game.objects.splice(game.objects.indexOf(object), 1);
     }
-    console.log(`Player ${player.id} Joined`);
-    this.players[player.id] = new this.Player(0, 0, player.handshake.query.name || 'player');
-    player.on('input',(input)=>{ 
-      this.players[player.id].input = input
-    })    
-    player.on('disconnect',()=>{ 
-      console.log(`Player ${player.id} Left`);
-      delete this.players[player.id];
-    });
-  }
-  tick(){
-    this.clientData = { sprites: [], sounds:[], text:[], circles:[] };
-    this.objects.forEach(object => object.tick(this));
-    Object.values(this.players).forEach(player => {player.tick(this);});
-    Object.keys(this.players).forEach(player => {io.to(player).emit('tick', this.clientData);});
-  }
-  draw(x, y, sprite){
-    this.clientData.sprites.push({
-      x: x,
-      y: y,
-      sprite: sprite
-    });
-  }
-  circle(x, y, width, height, color){
-    this.clientData.circles.push({
-      x: x,
-      y: y,
-      width: width,
-      height: height,
-      color: color
-    });
-  }
-  sound(x, y, sound){
-    this.clientData.sounds.push({
-      x: x,
-      y: y,
-      sound: sound
-    });
-  }
-  text(x, y, text, color, size){
-    this.clientData.text.push({
-      x: x,
-      y: y,
-      text: text,
-      color: color,
-      size: size
-    });
-  }
-  Player = class{
-    constructor(x,y,name){
-      this.input = {x:0,y:0};
-      this.name = name;
-      this.image = 'idle'
-      this.health = 100;
-      this.x = x; 
-      this.y = y;
-      this.xv = 0; 
-      this.yv = 0;
-      this.speed = 4;
-      this.falling = 0;
-      this.size = 20;
-      this.cooldown =0;
+
+    
+    function draw(x, y, sprite){
+      game.clientData.sprites.push({
+        x: x,
+        y: y,
+        sprite: sprite
+      });
     }
-    tick(game){
-      this.yv += 1; this.falling += 1;// Apply gravity
-      this.xv = this.input.x* this.speed; // Move the player left or right
-      if ((this.input.y==1) && this.falling<3){ this.yv = -15} // Jump
-      this.x += this.xv; this.y += this.yv; // Move the player  
-      if(this.y>(360-this.size/2)){ // collision bottom of screen
-        this.falling = 0; 
-        this.y=(360-this.size/2) 
+    function circle(x, y, width, height, color){
+      game.clientData.circles.push({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        color: color
+      });
+    }
+    function sound(x, y, sound){
+      game.clientData.sounds.push({
+        x: x,
+        y: y,
+        sound: sound
+      });
+    }
+    function text(x, y, text, color, size){
+      game.clientData.text.push({
+        x: x,
+        y: y,
+        text: text,
+        color: color,
+        size: size
+      });
+    }
+    function object(object, type, x, y, xv, yv, width, height, image){
+      object.type = type;
+      object.x = x;
+      object.y = y;
+      object.xv = xv;
+      object.yv = yv;
+      object.width = width;
+      object.height = height;
+      object.image = image;
+    }
+    function move(object, gravity, friction){
+      object.yv += gravity; 
+      object.xv *= friction;
+      object.x += object.xv; 
+      object.y += object.yv; 
+    }
+    function collide(){
+  
+    }
+    function colidingwith(obj1, obj2){
+      return (obj1.x + obj1.width > obj2.x &&
+              obj1.x < obj2.x + obj2.width &&
+              obj1.y + obj1.height > obj2.y &&
+              obj1.y < obj2.y + obj2.height)
+    }
+    function pointTowardsFrom(p1x, p1y, p2x, p2y){
+      let angle = Math.atan2(p2y-p1y, p2x-p1x);
+      return {x: Math.cos(angle), y: Math.sin(angle)};
+    }
+    function wrap(object){
+      if(object.x < 0){
+        object.x += 1280
+      }; 
+      if(object.x > 1280){
+        object.x -= 1280
+      }     
+    }
+
+    class Player{
+      constructor(game, x, y, name){
+        object(this,'Player', 40, 40, x, y, 20, 20, 'idle'); 
+        this.input = {x:0, y:0, mouseX:0, mousey:0, mouseIsPressed:0};
+        this.name = name;
+        this.health = 100;
+        this.speed = 3;
+        this.falling = 0;
+        this.cooldown =0;
       }
-      if(this.x<0){this.x+=1280}; if(this.x>1280){this.x-=1280}; //wrap 
-      if(this.input.y ==-1){ this.attack()}  
-      this.cooldown-=1;    
-      game.circle(this.x,this.y,20,20,'#383838');
-      game.text(this.x,this.y-20,this.name,'#383838',20);
+      tick(){
+        move(this, 1, .7); 
+        this.xv += this.input.x * this.speed; // Side Movement
+        if (this.input.y == 1 && this.falling < 6) { this.yv = -12 } // Jumping
+  
+        if(this.y > 360){  // collision bottom of screen
+          this.falling = 0; 
+          this.y = 360;                           
+        } else { this.falling += 1;}
+        wrap(this);
+        if(this.input.mouseIsPressed){ this.attack()}  
+        this.cooldown-=1;    
+        circle(this.x,this.y,20,20,'#383838');
+        text(this.x,this.y-20,this.name,'#383838',20);
+      }
+      async attack(){
+        if (this.cooldown > 0) {return}
+        this.image='attack'
+        await new Promise(resolve => setTimeout(resolve, 200));
+        this.image='idle'
+        this.cooldown = 0;
+        var direction = pointTowardsFrom(this.x, this.y, this.input.mouseX, this.input.mouseY);
+        game.objects.push(new Projectile(this.x, this.y, direction.x, direction.y,20));
+      }
+      death(){ this.velX = 0; this.velY = 0;}
     }
-    async attack(){
-      if (this.cooldown > 0) {return}
-      this.image='attack'
-      await new Promise(resolve => setTimeout(resolve, 200));
-      this.image='idle'
-      this.cooldown = 60;
-      objects.push(new Projectile(this.x,this.y))
-    }
-    death(){ this.velX = 0; this.velY = 0;}
-  }
-  Projectile = class{
-    constructor(x,y){
-      this.image = 'idle' 
-      this.x = x; this.y = y;
-      this.xv = 0; this.yv = 0;
-    }
-    tick(game){
-      game.draw(this.x,this.y,this.image);
+    class Projectile{
+      constructor(x,y,xv,yv,power){
+        object(this, 'Player', x, y, xv * power, yv * power, 20, 20, 'idle'); 
+      }
+      tick(){
+        move(this, 1, 1); 
+        wrap(this);
+        circle(this.x,this.y,5,5,'#383838');
+        if(this.y>400){ despawn(this)}
+      }
     }
   }
 }
