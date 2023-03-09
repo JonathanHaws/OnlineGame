@@ -1,5 +1,12 @@
 
+
+let sounds = {thud: 0};
 var serverinfo;
+
+function preload(){
+  sounds['thud'] = new Audio('sounds/thud.mp3');
+}
+
 function setup(){
   createCanvas(1280,720);
   let name = prompt("Please enter your name:");
@@ -15,14 +22,15 @@ function setup(){
   socket.on('tick',function(frame){serverinfo=frame;});
 }
   
-function draw(){// console.log(serverinfo);
+function draw(){ //console.log(serverinfo);
   background(220);
   fill(100);
   rect(0, height/2, width, height/2);
   if(serverinfo){
-    serverinfo.text.forEach(i =>     { fill(i.color); textSize(i.size); textAlign(CENTER); text(i.text, i.x, i.y)})
-    serverinfo.circles.forEach(i =>  { fill(i.color); ellipse(i.x, i.y, i.width, i.height)})
-    serverinfo.rectangles.forEach(i =>{ fill(i.color); rect(i.x, i.y, i.width, i.height)})
+    serverinfo.text.forEach(i =>      { fill(i.color); textSize(i.size); textAlign(CENTER); text(i.text, i.x, i.y)})
+    serverinfo.circles.forEach(i =>   { fill(i.color); ellipse(i.x, i.y, i.width, i.height)});
+    serverinfo.rectangles.forEach(i =>{ fill(i.color); rect(i.x, i.y, i.width, i.height)});
+    serverinfo.sounds.forEach(    i =>{ sounds[i.sound].play()});//sounds['thud'].play()
   }
 }
   

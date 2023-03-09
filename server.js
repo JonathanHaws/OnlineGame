@@ -131,9 +131,11 @@ class Game {
         this.xv += this.input.x * this.speed; // Side Movement
         if (this.input.y == 1 && this.falling < 6) { this.yv = -12 } // Jumping
         if(this.y > 360){  // collision bottom of screen
+          if(this.falling > 5){ sound(this.x,this.y,'thud'); }    
           this.falling = 0; 
-          this.y = 360;                           
-        } else { this.falling += 1;}
+          this.y = 360;          
+        } 
+        this.falling += 1;
         wrap(this);
         if(this.input.mouseIsPressed){ this.attack()}  
         this.cooldown-=1;    
@@ -141,6 +143,7 @@ class Game {
         text(this.x, this.y-20, this.name,'#383838',20);
         rectangle(this.x -25, this.y-40, (this.health/100)*50, 5, '#383838');
         if(this.input.y == -1){ this.health --;}  
+
       }
       async attack(){
         if (this.cooldown > 0) {return}
