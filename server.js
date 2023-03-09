@@ -176,7 +176,7 @@ class Game {
   }
 }
 
-var game = new Game(2,60);
+var game = new Game(10,60);
 io.on('connection',(player)=>{ game.join(player)});
 app.use(express.static('game'));
 server.listen(port,()=>{ console.log(`Server live ${port}.`)});
