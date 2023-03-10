@@ -22,7 +22,7 @@ function setup(){
   socket.on('tick',function(frame){serverinfo=frame;});
 }
   
-function draw(){ //console.log(serverinfo);
+function draw(){ console.log(serverinfo);
   background(220);
   fill(100);
   rect(0, height/2, width, height/2);
