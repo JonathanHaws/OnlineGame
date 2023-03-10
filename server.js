@@ -27,6 +27,12 @@ class Game {
     this.tick = function(){
       this.clientData = { sprites: [], sounds:[], text:[], circles:[], rectangles:[] };
       this.objects.forEach(object => object.tick());  
+      Object.values(this.object).forEach(type => { 
+        Object.values(type).forEach(objectsd => {     
+          //console.log(objectsd)       
+          objectsd.tick();
+        })
+      })
       Object.values(this.players).forEach(player => {player.tick();});
       Object.keys(this.players).forEach(player => {io.to(player).emit('tick', this.clientData);});
     }
@@ -34,10 +40,26 @@ class Game {
     this.maxPlayers = maxPlayers;
     this.players = {};
     this.objects = [];
+    this.object = {};
     this.game = this;
+
+    function spawn(object){
+      let type = object.constructor.name;
+      if(!game.object[type]){ game.object[type] = {};}
+      function randomInteger(max) { return (Math.floor(Math.random()*max)) }
+      let id = randomInteger(1000000);
+      while(game.object[type][id]){ 
+        id = randomInteger(1000000);
+      }
+      object.id = id;
+      game.object[type][id] = object;
+      return object
+      
+    }
     
     function despawn(object){
-      game.objects.splice(game.objects.indexOf(object), 1);
+      let type = object.constructor.name;
+      delete game.object[type][object.id];
     }
     function draw(x, y, sprite){
       game.clientData.sprites.push({
@@ -152,7 +174,7 @@ class Game {
         this.image='idle'
         this.cooldown = 0;
         var direction = pointTowardsFrom(this.x, this.y, this.input.mouseX, this.input.mouseY);
-        game.objects.push(new Projectile(this.x, this.y, direction.x, direction.y,20));
+        spawn(new Projectile(this.x, this.y, direction.x, direction.y,20));
       }
       async death(cooldown){ 
         this.x = (Math.floor(Math.random() * 5000));
