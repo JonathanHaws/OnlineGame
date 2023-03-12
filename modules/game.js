@@ -28,6 +28,21 @@ module.exports = class Game {
         delete this.objects[type][object.id];
         if (Object.keys(this.objects[type]).length === 0) { delete this.objects[type]; }
     }
+
+    collideObjectType(object , type){
+        if(!this.objects[type]){ return false; }
+        for(let id in this.objects[type]){
+            if(this.collideObjects(object, this.objects[type][id])){ return this.objects[type][id]; }
+        }
+        return false;
+    }
+
+    collideObjects(object1, object2) {
+        return (object1.x < object2.x + object2.width &&
+                object1.x + object1.width > object2.x &&
+                object1.y < object2.y + object2.height &&
+                object1.y + object1.height > object2.y);
+    }
         
     serialized(){
         const seen = new WeakSet();

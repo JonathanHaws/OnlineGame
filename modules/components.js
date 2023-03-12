@@ -1,5 +1,5 @@
 
-function body(object, x, y, width, height, image){
+function body (object, x, y, width, height, image){
     object.x = x;
     object.y = y;
     object.width = width;
@@ -14,4 +14,9 @@ function move (object, gravity, friction){
     object.y += object.yv;
 }
 
-module.exports = { body , move } ;
+function wrap (object, x, y, width, height){
+    if(object.x > 1280 + width){ object.x = -width; }
+    if(object.x < -width){ object.x = 1280 + width; }
+}
+
+module.exports = { body , move , wrap } ;

@@ -34,9 +34,13 @@ function draw(){
     fill('#7dc4c9'); 
     ellipse(i.x, i.y, i.width, i.height);
     textAlign(CENTER); 
-    textSize(30); 
-    fill('#303030');
-    text(i.name, i.x, i.y - 30);
+    textSize(25); 
+    fill(0, 0, 19, 100);
+    text(i.name, i.x, i.y - 40);
+    rect(i.x - 35, i.y - 32, 70, 8);
+    fill('#7dc4c9');
+    rect(i.x - 35, i.y - 32, 70 * Math.max((i.health / 100), 0 ), 8);
+
   });
   if(!serverinfo.Projectiles){ return; }
   Object.values(serverinfo.Projectiles).forEach(i => { //console.log(i);
