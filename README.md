@@ -1,8 +1,8 @@
 
-# Online Game
+# Online Multiplayer Game With Websockets
 https://onlinegame.herokuapp.com/ A test on how I could use websockets to make a game (Thanks Benny) Still in development
 
-![image](https://user-images.githubusercontent.com/108207472/222296922-c1b916c7-1714-4f85-84e7-1def33d649ee.png)
+![online game](https://user-images.githubusercontent.com/108207472/224538461-7cfdb0ac-091e-4969-8480-a7ea259401ee.gif)
 
 ## To Do List
 - comeup with asthetic game name and idea (context) / Story
