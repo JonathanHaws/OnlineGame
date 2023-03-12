@@ -3,7 +3,7 @@
 https://onlinegame.herokuapp.com/ A test on how I could use websockets to make a game (Thanks Benny) Still in development
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/108207472/224538461-7cfdb0ac-091e-4969-8480-a7ea259401ee.gif" width="400" height="400" alt="image description">
+  <img src="https://user-images.githubusercontent.com/108207472/224538461-7cfdb0ac-091e-4969-8480-a7ea259401ee.gif" alt="Gameplay">
 </p>
 
 
