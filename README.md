@@ -13,7 +13,9 @@ https://onlinegame.herokuapp.com/ A test on how I could use websockets to make a
 - add sound effects
 - add stuff that falls from the sky (health packs, special weapons, powerups)?
 - add character customization with local storage
+- add collision detection with unique Id and object type
 - add delta encoding for server
+- add serialization and filtering to avoid circular pointer reference stack overflow
 
 ### Credits
 Jonathan Haws / NodeJS / Express / Socket.io / P5 Library / Heroku
