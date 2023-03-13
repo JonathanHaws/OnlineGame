@@ -1,14 +1,14 @@
 
-const { body, move, wrap } = require('./components.js');
+const { body, move, wrap } = require('./functions.js');
 
 class Projectile {
     constructor(origin, x, y, xv, yv , knockbackX, knockbackY) {
         body(this, x, y, 14, 14, 'idle');
         this.origin = origin;
-        this.xv = xv; 
-        this.yv = yv;
         this.knockbackX = knockbackX;
         this.knockbackY = knockbackY;
+        this.xv= xv;
+        this.yv = yv;
     }
 
     tick() {

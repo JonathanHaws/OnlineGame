@@ -32,6 +32,7 @@ module.exports = class Game {
     collideObjectType(object , type){
         if(!this.objects[type]){ return false; }
         for(let id in this.objects[type]){
+            if(object == this.objects[type][id]){ continue; }
             if(this.collideObjects(object, this.objects[type][id])){ return this.objects[type][id]; }
         }
         return false;

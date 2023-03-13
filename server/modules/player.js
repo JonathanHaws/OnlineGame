@@ -1,5 +1,5 @@
 
-const { body, move , wrap} = require('./components.js');
+const { body, move, wrap } = require('./functions.js');
 const Projectile = require('./projectile.js');
 
 class Player {
@@ -23,9 +23,13 @@ class Player {
     tick() {
         if(this.health <= 0){ this.reset(); }
         wrap(this, 0, 0, this.width, 0);
-        move(this, 1, .6);
-        this.xv += this.input.x * this.speed;
+        move(this, 1, .6, ['Players']);
         
+        this.y ++;
+        if (this.game.collideObjectType(this, 'Players')){ this.falling = 0;}
+        this.y --;
+
+        this.xv += this.input.x * this.speed;
         this.falling ++;
         if(this.falling < 10 && this.input.y > 0){ this.yv = -11; }
         if(this.y >= 360){ 
