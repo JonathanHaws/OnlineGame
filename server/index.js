@@ -26,5 +26,5 @@ io.on('connection',(socket)=>{ //console.log('Socket joined '+ socket.id);
 
 });
 
-app.use(express.static('public'));
+app.use(express.static('client'));
 server.listen(port,()=>{ console.log(`Server live ${port}.`)});
